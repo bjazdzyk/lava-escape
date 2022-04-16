@@ -12,6 +12,27 @@ const cellSize = 20
 
 noise.seed(Math.random())
 
+
+class Player{
+	constructor(color){
+		this.color = color
+	}
+	render(){
+		ctx.fillStyle = this.color
+		ctx.fillRect((cameraOffset.x+this.x)*cellSize, (cameraOffset.y+this.y)*cellSize, cellSize, cellSize)
+	}
+	setPos(x, y){
+		this.x = x
+		this.y = y
+	}
+	move(x, y){
+		this.x += x
+		this.y += y
+	}
+}
+
+
+
 function mod(n, m) {
   return ((n % m) + m) % m;
 }
@@ -26,8 +47,8 @@ const resize = ()=>{
 	c.width = _W
 	c.height = _H
 
-	cols = _W/cellSize
-	rows = _H/cellSize
+	cols = Math.floor(_W/cellSize)
+	rows = Math.floor(_H/cellSize)
 }
 
 const generateCell = (x, y)=>{
@@ -52,6 +73,14 @@ const renderTerrain = ()=>{
 }
 
 
+resize()
+const Bob = new Player('red')
+Bob.setPos(Math.floor(cols/2), Math.floor(rows/2))
+
+
+
+
+
 const keys = {}
 document.addEventListener('keydown', (e)=>{
 	keys[e.code] = true
@@ -66,6 +95,7 @@ const loop = ()=>{
 	resize()
 
 	renderTerrain()
+	Bob.render()
 
 	if(keys["ArrowUp"]){
 		cameraOffset.y+=5/cellSize
