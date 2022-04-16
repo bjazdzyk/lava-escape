@@ -10,7 +10,6 @@ const cameraOffset = {x:0, y:0}
 const cellSize = 20
 
 
-noise.seed(Math.random())
 
 
 class Player{
@@ -19,7 +18,7 @@ class Player{
 	}
 	render(){
 		ctx.fillStyle = this.color
-		ctx.fillRect((cameraOffset.x+this.x)*cellSize, (cameraOffset.y+this.y)*cellSize, cellSize, cellSize)
+		ctx.fillRect(_W/2+(cameraOffset.x+this.x)*cellSize, _H/2+(cameraOffset.y+this.y)*cellSize, cellSize, cellSize)
 	}
 	setPos(x, y){
 		this.x = x
@@ -51,9 +50,13 @@ const resize = ()=>{
 	rows = Math.floor(_H/cellSize)
 }
 
+const generationLogics = (x, y)=>{
+	return (noise.simplex2(x/15, y/15)>=0.1)
+}
+
 const generateCell = (x, y)=>{
 	if(T[strcoords(x, y)] == null){
-		T[strcoords(x, y)] = (noise.simplex2(x/15, y/15)>=0.1)
+		T[strcoords(x, y)] = generationLogics(x, y)
 	}
 }
 
@@ -62,20 +65,26 @@ const renderTerrain = ()=>{
 	ctx.fillRect(0, 0, _W, _H)
 
 	ctx.fillStyle = "#75481c"
-	for(let i=-1; i<=cols; i++){
-		for(let j=-1; j<=rows; j++){
+	for(let i=-Math.ceil(cols/2)-1; i<=Math.ceil(cols/2)+1; i++){
+		for(let j=-Math.ceil(rows/2)-1; j<=Math.ceil(rows/2)+1; j++){
 			generateCell(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)
 			if(T[strcoords(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)] == 1){
-				ctx.fillRect((mod(cameraOffset.x, 1)+i)*cellSize, (mod(cameraOffset.y, 1)+j)*cellSize, cellSize, cellSize)
+				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize, cellSize)
 			}
 		}
 	}
 }
 
 
+let b
+while(!b){
+	noise.seed(Math.random())
+	b = generationLogics(0, -1)
+}
+
 resize()
 const Bob = new Player('red')
-Bob.setPos(Math.floor(cols/2), Math.floor(rows/2))
+Bob.setPos(0, 0)
 
 
 
