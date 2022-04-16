@@ -50,8 +50,24 @@ const resize = ()=>{
 	rows = Math.floor(_H/cellSize)
 }
 
+const getSimplex = (x, y)=>{
+	return noise.simplex2(x/15, y/15)
+}
+
 const generationLogics = (x, y)=>{
-	return (noise.simplex2(x/15, y/15)>=0.1)
+	
+	if(getSimplex(x, y)>=0.1){
+		return 1 //block
+	}else{
+		for(let i=y; i>y-50; i--){
+			if(getSimplex(x, i)>=0.1){
+				return 0 //air
+			}else if(getSimplex(x, i)*10000%100>80 && y-i>3){
+				return 2 //vines
+			}
+		}
+	}
+	return 0
 }
 
 const generateCell = (x, y)=>{
@@ -64,12 +80,16 @@ const renderTerrain = ()=>{
 	ctx.fillStyle = "#b06b27"
 	ctx.fillRect(0, 0, _W, _H)
 
-	ctx.fillStyle = "#75481c"
 	for(let i=-Math.ceil(cols/2)-1; i<=Math.ceil(cols/2)+1; i++){
 		for(let j=-Math.ceil(rows/2)-1; j<=Math.ceil(rows/2)+1; j++){
 			generateCell(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)
-			if(T[strcoords(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)] == 1){
+			const t = T[strcoords(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)]
+			if(t == 1){//draw block
+				ctx.fillStyle = "#75481c"
 				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize, cellSize)
+			}else if(t == 2){//draw vines
+				ctx.fillStyle = "#3eab32"
+				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize+cellSize/3, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize/3, cellSize)
 			}
 		}
 	}
@@ -82,7 +102,6 @@ while(!b){
 	b = generationLogics(0, -1)
 }
 
-resize()
 const Bob = new Player('red')
 Bob.setPos(0, 0)
 
