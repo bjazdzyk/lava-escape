@@ -15,6 +15,7 @@ const cellSize = 20
 class Player{
 	constructor(color){
 		this.color = color
+		this.VY = 0
 	}
 	render(){
 		ctx.fillStyle = this.color
@@ -27,6 +28,23 @@ class Player{
 	move(x, y){
 		this.x += x
 		this.y += y
+	}
+	update(){
+		if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){
+			if(this.VY>0){
+				this.VY = 0
+				this.y = Math.floor(this.y)
+			}
+		}else if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y)*-1)] == 1){
+			if(this.VY<0){
+				this.VY = 0
+				this.y = Math.ceil(this.y)
+			}
+		}else{
+			this.VY += 0.5/cellSize
+		}
+		this.y += this.VY
+
 	}
 }
 
@@ -56,13 +74,13 @@ const getSimplex = (x, y)=>{
 
 const generationLogics = (x, y)=>{
 	
-	if(getSimplex(x, y)>=0.1){
+	if(getSimplex(x, y)>=0.15){
 		return 1 //block
 	}else{
-		for(let i=y; i>y-50; i--){
-			if(getSimplex(x, i)>=0.1){
+		for(let i=y; i>y-500; i--){
+			if(getSimplex(x, i)>=0.15){
 				return 0 //air
-			}else if(getSimplex(x, i)*10000%100>80 && y-i>3){
+			}else if(getSimplex(x, i)*10000000%100>90 && y-i>3){
 				return 2 //vines
 			}
 		}
@@ -71,7 +89,7 @@ const generationLogics = (x, y)=>{
 }
 
 const generateCell = (x, y)=>{
-	if(T[strcoords(x, y)] == null){
+	if(T[strcoords(x, y)] == undefined){
 		T[strcoords(x, y)] = generationLogics(x, y)
 	}
 }
@@ -86,7 +104,7 @@ const renderTerrain = ()=>{
 			const t = T[strcoords(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)]
 			if(t == 1){//draw block
 				ctx.fillStyle = "#75481c"
-				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize, cellSize)
+				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)
 			}else if(t == 2){//draw vines
 				ctx.fillStyle = "#3eab32"
 				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize+cellSize/3, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize/3, cellSize)
@@ -99,7 +117,7 @@ const renderTerrain = ()=>{
 let b
 while(!b){
 	noise.seed(Math.random())
-	b = generationLogics(0, -1)
+	b = (generationLogics(0, -1) == 1)
 }
 
 const Bob = new Player('red')
@@ -123,20 +141,33 @@ const loop = ()=>{
 	resize()
 
 	renderTerrain()
+	Bob.update()
 	Bob.render()
 
 	if(keys["ArrowUp"]){
-		cameraOffset.y+=5/cellSize
+		if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){
+			if(!T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] == 1 && !T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] == 1){
+				Bob.VY=-8/cellSize
+			}
+		}
 	}
-	if(keys["ArrowDown"]){
-		cameraOffset.y-=5/cellSize
-	}
+	
 	if(keys["ArrowLeft"]){
-		cameraOffset.x+=5/cellSize
+		if(T[strcoords(Math.floor(Bob.x-3/cellSize)*-1, Math.floor(Bob.y)*-1)] != 1){
+			Bob.x-=3/cellSize
+		}else{
+			Bob.x = Math.floor(Bob.x)
+		}
 	}
 	if(keys["ArrowRight"]){
-		cameraOffset.x-=5/cellSize
+		if(T[strcoords(Math.ceil(Bob.x+3/cellSize)*-1, Math.floor(Bob.y)*-1)] != 1){
+			Bob.x+=3/cellSize
+		}else{
+			Bob.x = Math.ceil(Bob.x)
+		}
 	}
+	cameraOffset.x=-Bob.x
+	cameraOffset.y=-Bob.y
 	
 
 }
