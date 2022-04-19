@@ -154,14 +154,14 @@ const loop = ()=>{
 	
 	if(keys["ArrowLeft"]){
 		if(T[strcoords(Math.floor(Bob.x-3/cellSize)*-1, Math.floor(Bob.y)*-1)] != 1){
-			Bob.x-=3/cellSize
+			Bob.x-=5/cellSize
 		}else{
 			Bob.x = Math.floor(Bob.x)
 		}
 	}
 	if(keys["ArrowRight"]){
 		if(T[strcoords(Math.ceil(Bob.x+3/cellSize)*-1, Math.floor(Bob.y)*-1)] != 1){
-			Bob.x+=3/cellSize
+			Bob.x+=5/cellSize
 		}else{
 			Bob.x = Math.ceil(Bob.x)
 		}
