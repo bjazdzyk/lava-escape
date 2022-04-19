@@ -11,7 +11,7 @@ const cellSize = 20
 
 
 
-
+//test commit
 class Player{
 	constructor(color){
 		this.color = color
