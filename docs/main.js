@@ -11,7 +11,7 @@ const cellSize = 20
 
 
 
-//test commit
+
 class Player{
 	constructor(color){
 		this.color = color
@@ -93,8 +93,18 @@ const generateCell = (x, y)=>{
 		T[strcoords(x, y)] = generationLogics(x, y)
 	}
 }
-
+var onclick = function(x,y,weigth,height) {
+	if((xclick>x&&xclick<x+weigth)&&(yclick>y&&yclick<y+height)){
+		if(ifclick){
+			
+			return true
+		}
+		
+	}
+}
+T[strcoords(0,0)]=3
 const renderTerrain = ()=>{
+	
 	ctx.fillStyle = "#b06b27"
 	ctx.fillRect(0, 0, _W, _H)
 
@@ -108,9 +118,23 @@ const renderTerrain = ()=>{
 			}else if(t == 2){//draw vines
 				ctx.fillStyle = "#3eab32"
 				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize+cellSize/3, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize/3, cellSize)
-			}
+			}else if(t == 3){
+                ctx.fillStyle = "yellow"
+                ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)
+				if(onclick(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)){
+					console.log("boom")
+					
+					for(var z = 0;z<chestlist.length;z++) {
+						if((chestlist[z].x == Math.floor(cameraOffset.x)-i)&&(chestlist[z].y == Math.floor(cameraOffset.y)-j)) {
+							chestlist[z].open =true
+							
+						}
+					}
+				}
+            }
 		}
 	}
+	ifclick = false
 }
 
 
@@ -137,7 +161,7 @@ document.addEventListener('keyup', (e)=>{
 
 const loop = ()=>{
 	requestAnimationFrame(loop)
-
+	
 	resize()
 
 	renderTerrain()
@@ -154,21 +178,30 @@ const loop = ()=>{
 	
 	if(keys["ArrowLeft"]){
 		if(T[strcoords(Math.floor(Bob.x-3/cellSize)*-1, Math.floor(Bob.y)*-1)] != 1){
-			Bob.x-=5/cellSize
+			Bob.x-=3/cellSize
 		}else{
 			Bob.x = Math.floor(Bob.x)
 		}
 	}
+	
 	if(keys["ArrowRight"]){
 		if(T[strcoords(Math.ceil(Bob.x+3/cellSize)*-1, Math.floor(Bob.y)*-1)] != 1){
-			Bob.x+=5/cellSize
+			Bob.x+=3/cellSize
 		}else{
 			Bob.x = Math.ceil(Bob.x)
 		}
 	}
 	cameraOffset.x=-Bob.x
 	cameraOffset.y=-Bob.y
+	ctx.fillStyle="red"
 	
+	//chestfunctions()
+	for(var z=0;z<chestlist.length;z++){
+		if(chestlist[z].open) {
+			chestlist[z].opendraw()
+			chestlist[z].close()
+		}
+	}
 
 }
 loop()
