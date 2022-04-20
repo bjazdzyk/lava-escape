@@ -1,94 +1,78 @@
-const mapa = new Map()
+const itemMap = {}
 
 var xclick , yclick, ifclick = false
-var chestlist = [] 
+const chests = {} 
 
-c.addEventListener("click",e =>{
+c.addEventListener("click", (e)=>{
     xclick=e.clientX
     yclick=e.clientY
     ifclick = true
 },false)
 
-var item = function(img) {
-    this.img = img
-}
-var dirt = new item("https://static.wikia.nocookie.net/minecraft_pl_gamepedia/images/6/6b/Ziemia.png/revision/latest?cb=20190404212047")
-mapa.set("dirt",dirt)
-//sloty to tablica, jesli w slocie nr 9  nie ma niczego to wpisane jest tam 0
-var skrzynia = function(x,y,sloty,size) {
-    this.x=x
-    this.y=y
-    this.sloty = sloty
-    this.open = false
-    this.size=size
-}
-skrzynia.prototype.opener = function() {
-//warunek kolizji
-    if(((Bob.x-this.x)*(Bob.x-this.x)+(Bob.y-this.y)*(Bob.y-this.y))<101) {
-        if((cameraOffset.x+xclick-_W/2>=this.x)&&(cameraOffset.x+xclick-_W/2<=this.x+this.size)&&(cameraOffset.y+yclick-_H/2>=this.y)&&(cameraOffset.y+yclick-_H/2<=this.y+this.size)){
-            this.open = true
-        }
-        
+class item{
+    constructor(img){
+        this.img = img
     }
-
 }
-//skrzynia.prototype.draw = function() {
-//    ctx.fillStyle ="yellow"
-    
-//    ctx.fillRect(this.x+cameraOffset.x*cellSize-_W/2,this.y+cameraOffset.y*cellSize-_H/2,this.size,this.size)
-//}
 
-//funkcje wykonywane jesli this.open = true
-skrzynia.prototype.opendraw = function(){
-    ctx.fillStyle = 'Brown'
-    ctx.lineWidth = 6
-    ctx.fillRect(0,0,1365,969)
-    ctx.strokeStyle= "green"
-    ctx.beginPath()
-    ctx.moveTo(682.5,0)
-    ctx.lineTo(682.5,969)
-    ctx.stroke()
-    ctx.lineWidth = 2
-    ctx.strokeRect(10,10,662.5,662.5)
-    var counter =0 
-    for(var i = 20;i<672.5;i=i+217.5) {
-        for(var j =20;j<672.5;j=j+217.5) {
-            if(this.sloty[counter] != "0" ) {
-                var img = new Image()
-                img.src = mapa.get(this.sloty[counter]).img
- //               img.onload = function() {
-                    
-                    ctx.drawImage(img,i,j,217.5,217.5)
-//                }
-                
-                
-                
-// this.sloty counter zwraca nazwe bloku, ktory przez mape paruje go z jego obiektem w ktorym szukamy atrybutu src
-                
+itemMap["dirt"] = new item("imgs/dirt.png")
+
+class skrzynia{
+    constructor(cols, rows, items){
+        this.items = items
+        this.open = false
+        this.cols = cols
+        this.rows = rows
+    }
+    opener(){
+        //TODO sprawdzanie odległości od skrzynki
+        this.open = true
+    }
+    checkClose(){
+        if(keys["Escape"]){
+            this.open=false
+        }
+    }
+    drawGui(){
+        const guiWidth = Math.min(_H * 5/6 * 3/2, _W*5/6)  // 5/6->stosunek dlugosci gui do dlugosci ekranu 3/2->stosunek szer do wys
+        const guiHeight = Math.min(_W * 5/6 * 2/3, _H*5/6)
+
+        const guiOffsetX = (_W-guiWidth)/2
+        const guiOffsetY = (_H-guiHeight)/2
+
+        ctx.fillStyle = 'Brown'
+        ctx.fillRect(guiOffsetX-10, guiOffsetY-10, guiWidth+20, guiHeight+20)
+
+        ctx.strokeStyle = "black"
+        ctx.lineWidth = 5
+        
+        for(let i=0; i<this.cols; i++){
+            for(let j=0; j<this.rows; j++){
+                const cellSize = Math.min(guiWidth/this.cols, guiHeight/this.rows)
+                const gridOffsetX = (guiWidth-this.cols*cellSize)/2
+                const gridOffsetY = (guiHeight-this.rows*cellSize)/2
+
+                ctx.strokeRect(guiOffsetX + gridOffsetX + i*cellSize, guiOffsetY + gridOffsetY + j*cellSize, cellSize, cellSize)
+                if(this.items[strcoords(i, j)]){
+                    const img = new Image()
+                    img.src = itemMap[this.items[strcoords(i, j)]].img
+                    ctx.drawImage(img, guiOffsetX + gridOffsetX + i*cellSize, guiOffsetY + gridOffsetY + j*cellSize, cellSize, cellSize)
+                }
             }
-            
-            counter++
         }
     }
-    
 }
-skrzynia.prototype.close = function() {
-//jezeli nacisniesz escape zmayka
-    if(keys["Escape"]){
-        this.open=false
-    }
-}
-var przyklad = new skrzynia(0,0,["dirt","dirt","dirt","dirt","dirt","dirt","dirt","dirt","dirt"],20)
-chestlist.push(przyklad)
-var chestfunctions = function() {
-    for(var i =0;i<chestlist.length;i++) {
-        chestlist[i].draw()
-       
-        chestlist[i].opener()
+
+
+var przyklad = new skrzynia(5, 4, {"0:0":"dirt", "4:1":"dirt", "1:2":"dirt", "2:3":"dirt"})
+chests["0:0"] = przyklad
+
+var chestfunctions = ()=>{
+    for(const i in chests) {
         
-        if(chestlist[i].open) {
-            chestlist[i].opendraw()
-            chestlist[i].close()
+        if(chests[i].open) {
+            chests[i].drawGui()
+            chests[i].checkClose()
         }
     }
 }

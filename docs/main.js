@@ -93,11 +93,12 @@ const generateCell = (x, y)=>{
 		T[strcoords(x, y)] = generationLogics(x, y)
 	}
 }
-var onclick = function(x,y,weigth,height) {
-	if((xclick>x&&xclick<x+weigth)&&(yclick>y&&yclick<y+height)){
+var onclick = function(x, y, weigth, height, fun) {
+	if((xclick > x && xclick < x+weigth) && (yclick > y && yclick < y+height)){
 		if(ifclick){
 			
-			return true
+			fun()
+			ifclick = false
 		}
 		
 	}
@@ -110,31 +111,31 @@ const renderTerrain = ()=>{
 
 	for(let i=-Math.ceil(cols/2)-1; i<=Math.ceil(cols/2)+1; i++){
 		for(let j=-Math.ceil(rows/2)-1; j<=Math.ceil(rows/2)+1; j++){
+
 			generateCell(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)
-			const t = T[strcoords(Math.floor(cameraOffset.x)-i, Math.floor(cameraOffset.y)-j)]
+
+			const x = Math.floor(cameraOffset.x)-i
+			const y = Math.floor(cameraOffset.y)-j
+			const t = T[strcoords(x, y)]
+
 			if(t == 1){//draw block
 				ctx.fillStyle = "#75481c"
 				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)
 			}else if(t == 2){//draw vines
 				ctx.fillStyle = "#3eab32"
 				ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize+cellSize/3, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize/3, cellSize)
-			}else if(t == 3){
-                ctx.fillStyle = "yellow"
-                ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)
-				if(onclick(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)){
-					console.log("boom")
-					
-					for(var z = 0;z<chestlist.length;z++) {
-						if((chestlist[z].x == Math.floor(cameraOffset.x)-i)&&(chestlist[z].y == Math.floor(cameraOffset.y)-j)) {
-							chestlist[z].open =true
-							
-						}
-					}
-				}
-            }
+			}else if(t == 3){//chest
+        ctx.fillStyle = "yellow"
+        ctx.fillRect(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1)
+
+        //open chest gui
+				onclick(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1, ()=>{
+					chests[strcoords(x, y)].open = true
+				})
+				
+      }
 		}
 	}
-	ifclick = false
 }
 
 
@@ -193,15 +194,8 @@ const loop = ()=>{
 	}
 	cameraOffset.x=-Bob.x
 	cameraOffset.y=-Bob.y
-	ctx.fillStyle="red"
-	
-	//chestfunctions()
-	for(var z=0;z<chestlist.length;z++){
-		if(chestlist[z].open) {
-			chestlist[z].opendraw()
-			chestlist[z].close()
-		}
-	}
+
+	chestfunctions()
 
 }
 loop()
