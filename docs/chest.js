@@ -40,11 +40,14 @@ class skrzynia{
         const guiOffsetX = (_W-guiWidth)/2
         const guiOffsetY = (_H-guiHeight)/2
 
-        ctx.fillStyle = 'Brown'
+        ctx.strokeStyle = "#291b10"
+        ctx.fillStyle = '#915d36'
         ctx.fillRect(guiOffsetX-10, guiOffsetY-10, guiWidth+20, guiHeight+20)
-
-        ctx.strokeStyle = "black"
         ctx.lineWidth = 5
+        ctx.strokeRect(guiOffsetX-10, guiOffsetY-10, guiWidth+20, guiHeight+20)
+
+
+
         
         for(let i=0; i<this.cols; i++){
             for(let j=0; j<this.rows; j++){
