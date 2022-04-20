@@ -17,6 +17,7 @@ class Player{
 	constructor(color){
 		this.color = color
 		this.VY = 0
+		this.moveType = "walk"
 	}
 	render(){
 		ctx.fillStyle = this.color
@@ -31,20 +32,24 @@ class Player{
 		this.y += y
 	}
 	update(){
-		if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){
+		if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){//zatrzymanie po upadaniu
 			if(this.VY>0){
 				this.VY = 0
 				this.y = Math.floor(this.y)
 			}
-		}else if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y)*-1)] == 1){
+		}else if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y)*-1)] == 1){//zatrzymanie po walnięciu w sufit
 			if(this.VY<0){
 				this.VY = 0
 				this.y = Math.ceil(this.y)
 			}
-		}else{
-			this.VY += 0.5/cellSize
+		}else{//do gory jesli w bloku
+			this.VY += cellSize/800
 		}
-		this.y += this.VY
+		if(this.moveType == "walk"){
+			this.y += this.VY//gravitacja
+		}else{
+			this.VY = 0
+		}
 
 	}
 }
@@ -142,7 +147,7 @@ const renderTerrain = ()=>{
 	}
 }
 
-//nowy seed dopoki nie stoi na ziemi
+//nowy seed dopoki gracz nie stoi na ziemi
 let b
 while(!b){
 	noise.seed(Math.random())
@@ -173,33 +178,72 @@ const loop = ()=>{
 	Bob.update()
 	Bob.render()
 
-	if(keys["KeyW"]){
-		if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){//gdy stoi na ziemi
+	if(keys["Space"]){
+
+		if(Bob.moveType == "walk"){
+			if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){//gdy stoi na ziemi
+				if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1 && T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1){//i nie ma sufitu tuz nad sobą
+					Bob.VY=-cellSize/40//skakanie
+				}
+			}
+		}else if(Bob.moveType == "climb"){
+			Bob.moveType = "walk"
 			if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1 && T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1){//i nie ma sufitu tuz nad sobą
-				Bob.VY=-cellSize/50
+				Bob.VY=-cellSize/40//skakanie
+			}
+		}
+	}
+
+	if(keys["KeyW"]){
+		if(T[strcoords(Math.ceil(Bob.x-0.5)*-1, Math.floor(Bob.y)*-1)] == 2){//wspinanie
+			Bob.moveType = "climb"
+			Bob.x = Math.ceil(Bob.x-0.5)
+
+		}
+		if(Bob.moveType == "climb"){
+			if(T[strcoords(Math.ceil(Bob.x-0.5)*-1, Math.floor(Bob.y-step)*-1)] != 1){
+				Bob.y -= step
+			}
+		}
+	}
+
+	if(keys["KeyS"]){
+		if(Bob.moveType == "climb"){
+			if(T[strcoords(Math.ceil(Bob.x-0.5)*-1, Math.ceil(Bob.y)*-1)] == 2){
+				Bob.y += step
+			}else{
+				Bob.moveType = "walk"
 			}
 		}
 	}
 	
 	if(keys["KeyA"]){
-		if(T[strcoords(Math.floor(Bob.x-step)*-1, Math.floor(Bob.y)*-1)] != 1){//kolizja
-			Bob.x-=step
-		}else{
-			Bob.x = Math.floor(Bob.x)
+		if(Bob.moveType == "walk"){
+			if(T[strcoords(Math.floor(Bob.x-step)*-1, Math.floor(Bob.y)*-1)] != 1){//kolizja
+				Bob.x-=step
+			}else{
+				Bob.x = Math.floor(Bob.x)
+			}
 		}
 	}
 	
 	if(keys["KeyD"]){
-		if(T[strcoords(Math.ceil(Bob.x+step)*-1, Math.floor(Bob.y)*-1)] != 1){//kolizja
-			Bob.x+=step
-		}else{
-			Bob.x = Math.ceil(Bob.x)
+		if(Bob.moveType == "walk"){
+			if(T[strcoords(Math.ceil(Bob.x+step)*-1, Math.floor(Bob.y)*-1)] != 1){//kolizja
+				Bob.x+=step
+			}else{
+				Bob.x = Math.ceil(Bob.x)
+			}
 		}
 	}
 	cameraOffset.x=-Bob.x
 	cameraOffset.y=-Bob.y
 
 	chestfunctions()
+
+
+
+	//console.log(T[strcoords(Math.ceil(Bob.x-0.5)*-1, Math.floor(Bob.y)*-1)])
 
 }
 loop()
