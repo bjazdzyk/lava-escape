@@ -11,6 +11,7 @@ const itemMap = {
 
 var xclick , yclick, ifclick = false
 const chests = {} 
+let activeChest = null
 
 
 
@@ -32,10 +33,12 @@ class skrzynia{
     opener(){
         //TODO sprawdzanie odległości od skrzynki
         this.open = true
+        activeChest = this
     }
     checkClose(){
         if(keys["Escape"]){
             this.open=false
+            activeChest = null
         }
     }
     drawGui(inventory = null){
@@ -103,19 +106,17 @@ const playerInv = new skrzynia(8, 4, {})
 var chestfunctions = ()=>{
     if(keys["KeyE"]){
         playerInv.open = true
+        activeChest = playerInv
     }
-
-    if(playerInv.open){
-        playerInv.drawGui()
-        playerInv.checkClose()
-    }else{
-        for(const i in chests) {
-            if(chests[i].open) {
-                chests[i].drawGui(playerInv)
-                chests[i].checkClose()
-                break
-            }
+    if(activeChest){
+        if(activeChest == playerInv){
+            activeChest.drawGui()
+            activeChest.checkClose()
+        }else{
+            activeChest.drawGui(playerInv)
+            activeChest.checkClose()
         }
     }
+
     ifclick = false
 }

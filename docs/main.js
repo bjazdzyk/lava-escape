@@ -42,7 +42,7 @@ class Player{
 				this.VY = 0
 				this.y = Math.ceil(this.y)
 			}
-		}else{//do gory jesli w bloku
+		}else{
 			this.VY += cellSize/800
 		}
 		if(this.moveType == "walk"){
@@ -140,6 +140,7 @@ const renderTerrain = ()=>{
         //open chest gui
 				onclick(_W/2+(mod(cameraOffset.x, 1)+i)*cellSize, _H/2+(mod(cameraOffset.y, 1)+j)*cellSize, cellSize+1, cellSize+1, ()=>{
 					chests[strcoords(x, y)].open = true
+					activeChest = chests[strcoords(x, y)]
 				})
 				
       }
