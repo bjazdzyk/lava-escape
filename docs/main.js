@@ -104,12 +104,12 @@ var onclick = function(x, y, weigth, height, fun) {
 		if(ifclick){
 			
 			fun()
-			ifclick = false
+			
 		}
 		
 	}
 }
-T[strcoords(0,0)]=3
+
 const renderTerrain = ()=>{
 	
 	ctx.fillStyle = "#b06b27"
@@ -157,6 +157,10 @@ while(!b){
 const Bob = new Player('red')
 Bob.setPos(0, 0)
 
+
+var przyklad = new skrzynia(4, 3, {"0:0":"dirt", "2:1":"dirt"})
+chests["0:0"] = przyklad
+T[strcoords(0,0)] = 3
 
 
 
