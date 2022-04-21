@@ -7,7 +7,9 @@ move left  -  A \
 move right  -  D \
 climb up  -  W \
 climb down  -  S \
+open inventory  -  E \
 open chests  -  LEFT MOUSE CLICK \
+exit inventory/chest  -  Esc \
 
 
 

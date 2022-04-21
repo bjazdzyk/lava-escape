@@ -7,8 +7,8 @@ let cols, rows
 const T = {}
 
 const cameraOffset = {x:0, y:0}
-const cellSize = 20
-const step = cellSize/100
+const cellSize = 30
+const step = cellSize/120
 
 
 
@@ -187,13 +187,13 @@ const loop = ()=>{
 		if(Bob.moveType == "walk"){
 			if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){//gdy stoi na ziemi
 				if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1 && T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1){//i nie ma sufitu tuz nad sobą
-					Bob.VY=-cellSize/40//skakanie
+					Bob.VY=-cellSize/50//skakanie
 				}
 			}
 		}else if(Bob.moveType == "climb"){
 			Bob.moveType = "walk"
 			if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1 && T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1){//i nie ma sufitu tuz nad sobą
-				Bob.VY=-cellSize/40//skakanie
+				Bob.VY=-cellSize/50//skakanie
 			}
 		}
 	}

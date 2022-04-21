@@ -101,11 +101,20 @@ const playerInv = new skrzynia(8, 4, {})
 
 
 var chestfunctions = ()=>{
-    for(const i in chests) {
-        
-        if(chests[i].open) {
-            chests[i].drawGui(playerInv)
-            chests[i].checkClose()
+    if(keys["KeyE"]){
+        playerInv.open = true
+    }
+
+    if(playerInv.open){
+        playerInv.drawGui()
+        playerInv.checkClose()
+    }else{
+        for(const i in chests) {
+            if(chests[i].open) {
+                chests[i].drawGui(playerInv)
+                chests[i].checkClose()
+                break
+            }
         }
     }
     ifclick = false
