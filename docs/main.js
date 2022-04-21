@@ -7,9 +7,8 @@ let cols, rows
 const T = {}
 
 const cameraOffset = {x:0, y:0}
-const cellSize = 30
-const step = cellSize/120
-
+const cellSize = 20
+let step = cellSize/100
 
 
 
@@ -32,6 +31,12 @@ class Player{
 		this.y += y
 	}
 	update(){
+		if(this.y*-1<lavaLevel){
+			step = cellSize/200
+		}else{
+			step = cellSize/100
+		}
+
 		if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){//zatrzymanie po upadaniu
 			if(this.VY>0){
 				this.VY = 0
@@ -80,15 +85,17 @@ const getSimplex = (x, y)=>{
 
 const generationLogics = (x, y)=>{
 	
-	if(getSimplex(x, y)>=0.15){
+	if(getSimplex(x, y)>=0.20){
 		return 1 //block
 	}else{
-		for(let i=y; i>y-500; i--){
-			if(getSimplex(x, i)>=0.15){
+		let i = y
+		while(1){
+			if(getSimplex(x, i)>=0.20){
 				return 0 //air
 			}else if(getSimplex(x, i)*10000000%100>75 && y-i>1){
 				return 2 //vines
 			}
+			i--
 		}
 	}
 	return 0
@@ -146,14 +153,33 @@ const renderTerrain = ()=>{
       }
 		}
 	}
+	updateLava()
+	renderLava()
 }
 
-//nowy seed dopoki gracz nie stoi na ziemi
+let lavaLevel = -20
+let lavaRisingSpeed = 0.06
+
+const updateLava = ()=>{
+	lavaLevel += lavaRisingSpeed
+	lavaRisingSpeed = Math.abs(lavaLevel + Bob.y)/500+0.07
+	console.log(Math.floor(lavaLevel + Bob.y))
+
+}
+const renderLava = ()=>{
+	ctx.globalAlpha = 0.8
+	ctx.fillStyle = "darkorange"
+	ctx.fillRect(0, _H, _W, Math.max(-_H, (cameraOffset.y-lavaLevel)*cellSize-_H/2))
+	ctx.globalAlpha = 1
+}
+
+//nowy seed az gracz stoi na ziemi
 let b
 while(!b){
 	noise.seed(Math.random())
 	b = (generationLogics(0, -1) == 1)
 }
+
 
 const Bob = new Player('red')
 Bob.setPos(0, 0)
@@ -174,12 +200,16 @@ document.addEventListener('keyup', (e)=>{
 	keys[e.code] = null
 })
 
+
 const loop = ()=>{
 	requestAnimationFrame(loop)
-	
-	resize()
 
+
+
+	resize()
 	renderTerrain()
+
+
 	Bob.update()
 	Bob.render()
 
@@ -188,13 +218,13 @@ const loop = ()=>{
 		if(Bob.moveType == "walk"){
 			if(T[strcoords(Math.ceil(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1 || T[strcoords(Math.floor(Bob.x)*-1, Math.ceil(Bob.y)*-1)] == 1){//gdy stoi na ziemi
 				if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1 && T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1){//i nie ma sufitu tuz nad sobą
-					Bob.VY=-cellSize/50//skakanie
+					Bob.VY=-step*2//skakanie
 				}
 			}
 		}else if(Bob.moveType == "climb"){
 			Bob.moveType = "walk"
 			if(T[strcoords(Math.ceil(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1 && T[strcoords(Math.floor(Bob.x)*-1, Math.floor(Bob.y-1)*-1)] != 1){//i nie ma sufitu tuz nad sobą
-				Bob.VY=-cellSize/50//skakanie
+				Bob.VY=-step*2//skakanie
 			}
 		}
 	}
@@ -245,6 +275,7 @@ const loop = ()=>{
 	cameraOffset.y=-Bob.y
 
 	chestfunctions()
+
 
 
 
