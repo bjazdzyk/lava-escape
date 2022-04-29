@@ -163,7 +163,7 @@ let lavaRisingSpeed = 0.06
 const updateLava = ()=>{
 	lavaLevel += lavaRisingSpeed
 	lavaRisingSpeed = Math.abs(lavaLevel + Bob.y)/500+0.07
-	console.log(Math.floor(lavaLevel + Bob.y))
+	
 
 }
 const renderLava = ()=>{
@@ -185,7 +185,7 @@ const Bob = new Player('red')
 Bob.setPos(0, 0)
 
 
-var przyklad = new skrzynia(4, 3, {"0:0":"dirt", "2:1":"dirt"})
+var przyklad = new skrzynia(4, 3, {"0:0":[1,"dirt"], "2:1":[1,"dirt"]})         
 chests["0:0"] = przyklad
 T[strcoords(0,0)] = 3
 
@@ -202,6 +202,7 @@ document.addEventListener('keyup', (e)=>{
 
 
 const loop = ()=>{
+	c.style.cursor="default"
 	requestAnimationFrame(loop)
 
 
