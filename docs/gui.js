@@ -1,11 +1,25 @@
+
+
+var mousex=0, mousey=0
+const amounts = function(text,a,b,c,d) {
+    text = text +''
+    ctx.fillStyle = 'black'
+    var x = c/4 +'px serif'
+    ctx.font = x
+    
+    
+    ctx.fillText(text,a+0.9*c,b+0.9*d)
+}
 class item{
-    constructor(img){
+    constructor(img,stack){
         this.img = img
+        this.stack = stack
     }
 }
 const itemMap = {
-    dirt: new item("imgs/dirt.png"),
-    sand: new item("imgs/dirt.png")
+    dirt: new item("imgs/dirt.png",64),
+    sand: new item("imgs/dirt.png",64),
+    0: new item("lalalala",0)
 
 }
 
@@ -20,8 +34,12 @@ c.addEventListener("click", (e)=>{
     yclick=e.clientY
     ifclick = true
 },false)
+c.addEventListener("mousemove", (e)=>{
+    mousex=e.offsetX
+    mousey=e.offsetY 
+},false)
 
-
+var spot_myszka = [0,"0"]
 
 class skrzynia{
     constructor(cols, rows, items){
@@ -30,6 +48,7 @@ class skrzynia{
         this.cols = cols
         this.rows = rows
     }
+    
     opener(){
         //TODO sprawdzanie odległości od skrzynki
         this.open = true
@@ -75,10 +94,36 @@ class skrzynia{
             for(let j=0; j<this.rows; j++){
 
                 ctx.strokeRect(guiOffsetX + chestOffsetX + i*cellSize, guiOffsetY + chestOffsetY + j*cellSize, cellSize, cellSize)
-                if(this.items[strcoords(i, j)]){
+                onclick(guiOffsetX + chestOffsetX + i*cellSize, guiOffsetY + chestOffsetY + j*cellSize, cellSize, cellSize,()=> {  
+                    if(! this.items[strcoords(i,j)]) {
+                        
+                        this.items[strcoords(i,j)]=[0,"0"]
+                    }
+                    if(this.items[strcoords(i,j)][1]==spot_myszka[1]){
+                        this.items[strcoords(i,j)][0]+=spot_myszka[0]
+                        spot_myszka[0]=0
+                        if(itemMap[this.items[strcoords(i,j)][1]].stack<this.items[strcoords(i,j)][0]){
+                            spot_myszka[0] = this.items[strcoords(i,j)][0]-itemMap[this.items[strcoords(i,j)][1]].stack
+                            this.items[strcoords(i,j)][0]=itemMap[this.items[strcoords(i,j)][1]].stack
+                        }else{
+                            spot_myszka[0]=0
+                            spot_myszka[1]="0"
+                        }
+                    }else {
+                        var x = this.items[strcoords(i,j)]
+                        this.items[strcoords(i,j)]=spot_myszka
+                        spot_myszka=x
+                    }
+                        
+                    
+                    
+                })
+                if(this.items[strcoords(i, j)]&&this.items[strcoords(i, j)][1]!="0"){
                     const img = new Image()
-                    img.src = itemMap[this.items[strcoords(i, j)]].img
+                    
+                    img.src = itemMap[this.items[strcoords(i, j)][1]].img
                     ctx.drawImage(img, guiOffsetX + chestOffsetX + i*cellSize + cellSize/10, guiOffsetY + chestOffsetY + j*cellSize + cellSize/10, cellSize*0.8, cellSize*0.8)
+                    amounts(this.items[strcoords(i,j)][0],guiOffsetX + chestOffsetX + i*cellSize + cellSize/10, guiOffsetY + chestOffsetY + j*cellSize + cellSize/10, cellSize*0.8, cellSize*0.8)
                 }
             }
         }
@@ -88,20 +133,54 @@ class skrzynia{
             for(let j=0; j<invRows; j++){
 
                 ctx.strokeRect(guiOffsetX + invOffsetX + i*cellSize, guiOffsetY + invOffsetY + j*cellSize, cellSize, cellSize)
-                
-                if(inventory.items[strcoords(i, j)]){
+                onclick(guiOffsetX + invOffsetX + i*cellSize + cellSize/10, guiOffsetY + invOffsetY + j*cellSize + cellSize/10, cellSize*0.8, cellSize*0.8,()=>{
+                    if(! inventory.items[strcoords(i,j)]){
+                        inventory.items[strcoords(i,j)]=[0,"0"]
+                        
+                    }
+                    if(inventory.items[strcoords(i,j)][1]==spot_myszka[1]){
+                        inventory.items[strcoords(i,j)][0]+=spot_myszka[0]
+                        spot_myszka[0]=0
+                        if(itemMap[inventory.items[strcoords(i,j)][1]].stack<inventory.items[strcoords(i,j)][0]){
+                            spot_myszka[0] = inventory.items[strcoords(i,j)][0]-itemMap[inventory.items[strcoords(i,j)][1]].stack
+                            inventory.items[strcoords(i,j)][0]=itemMap[inventory.items[strcoords(i,j)][1]].stack
+                        }else{
+                            spot_myszka[0]=0
+                            spot_myszka[1]="0"
+                        }
+                    }else {
+                        var x = inventory.items[strcoords(i,j)]
+                        inventory.items[strcoords(i,j)]=spot_myszka
+                        spot_myszka=x
+                    }
+                    
+                })
+                if(inventory.items[strcoords(i, j)]&&inventory.items[strcoords(i,j)][1]!="0"){
                     const img = new Image()
-                    img.src = itemMap[this.items[strcoords(i, j)]].img
+                    
+                    img.src = itemMap[inventory.items[strcoords(i, j)][1]].img
                     ctx.drawImage(img, guiOffsetX + invOffsetX + i*cellSize + cellSize/10, guiOffsetY + invOffsetY + j*cellSize + cellSize/10, cellSize*0.8, cellSize*0.8)
+                    amounts(inventory.items[strcoords(i, j)][0],guiOffsetX + invOffsetX + i*cellSize + cellSize/10, guiOffsetY + invOffsetY + j*cellSize + cellSize/10, cellSize*0.8, cellSize*0.8)
                 }
             }
         }
+        if(spot_myszka[1]!="0"){
+            const img = new Image()
+            img.src = itemMap[spot_myszka[1]].img
+            ctx.drawImage(img,mousex-cellSize*0.4,mousey-cellSize*0.4,cellSize*0.8,cellSize*0.8)
+            document.getElementById("c").style.cursor="none"
+            
+            amounts((spot_myszka[0]),mousex-cellSize*0.4,mousey-cellSize*0.4,cellSize*0.8,cellSize*0.8)
+        }else{
+            document.getElementById("c").style.cursor="crosshair"
+        }
+        
     }
 }
 
 
-const playerInv = new skrzynia(8, 4, {})
-
+const playerInv = new skrzynia(8, 4, {"0:0":[63,"dirt"]})
+console.log(playerInv.items["0:0"][1])
 
 var chestfunctions = ()=>{
     if(keys["KeyE"]){
@@ -120,3 +199,4 @@ var chestfunctions = ()=>{
 
     ifclick = false
 }
+
